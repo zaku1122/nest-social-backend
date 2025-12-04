@@ -1,43 +1,40 @@
-import { Controller,Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  UseFilters } from '@nestjs/common';
+import { Controller, Get, Post as HttpPost, Body, Param, Put, Delete, Req, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { SimpleAuthGuard } from './guards/simple-auth.guard';
-import { NotFoundFilter } from './filters/not-found.filter';
-@UseGuards(SimpleAuthGuard)
-@UseFilters(new NotFoundFilter())
+import { AuthGuard } from '@nestjs/passport';
+
 @Controller('posts')
+@UseGuards(AuthGuard('jwt'))
 export class PostsController {
-    constructor(private readonly postsService: PostsService) {}
-    @Get()
-    findAll() {
-        return this.postsService.findAll();
-    }
+  constructor(private readonly postsService: PostsService) {}
 
-    @Get(':id')
-    findOne(@Param('id') id: number) {
-        return this.postsService.findOne(id);
-    }
 
-    @Post()
-    create(@Body() createPostDto: CreatePostDto) {
-        return this.postsService.create(createPostDto);
-    }
+  @HttpPost()
+  create(@Req() req, @Body() dto: CreatePostDto) {
+    return this.postsService.create(dto, req.user.userId);
+  }
 
-    @Patch(':id')
-    update(@Param('id') id: number, @Body() dto: UpdatePostDto) {
-        return this.postsService.update(id, dto);
-    }
+  @Get()
+  findAll(@Req() req) {
+    return this.postsService.findAll(req.user.userId);
+  }
 
-    @Delete(':id')
-    remove(@Param('id') id: number) {
-        return this.postsService.remove(id);
-    }
+
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req) {
+    return this.postsService.findOne(id, req.user.userId);
+  }
+
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdatePostDto, @Req() req) {
+    return this.postsService.update(id, dto, req.user.userId);
+  }
+
+  
+  @Delete(':id')
+  delete(@Param('id') id: string, @Req() req) {
+    return this.postsService.delete(id, req.user.userId);
+  }
 }

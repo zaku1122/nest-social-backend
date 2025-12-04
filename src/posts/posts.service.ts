@@ -1,44 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Post, PostDocument } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto'; 
-import { PostNotFoundException } from './exceptions/post-not-found.exception';
-import { Post } from './interfaces/post.interface';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
-    private posts: Post[] = [];
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+  ) {}
 
-    findAll() {
-        return this.posts;
+
+  async create(dto: CreatePostDto, userId: string) {
+    return this.postModel.create({
+      ...dto,
+      author: userId,
+    });
+  }
+
+
+  async findAll(userId: string) {
+    return this.postModel.find({ author: userId });
+  }
+
+
+  async findOne(id: string, userId: string) {
+    const post = await this.postModel.findById(id);
+    if (!post)
+    {   
+        throw new NotFoundException('Post not found'); 
     }
 
-    findOne(id: number) {
-        const post = this.posts.find(post => post.id === id);
-        if (!post) {
-            throw new PostNotFoundException(id);
-        }
-        return post;
+    return post;
+  }
+
+
+  async update(id: string, dto: UpdatePostDto, userId: string) {
+    const post = await this.findOne(id, userId);
+
+    if(post.author.toString() !== userId) {
+      throw new ForbiddenException('You are not allowed to update this post');
     }
 
+    Object.assign(post, dto);
+    return post.save();
+  }
 
-    create( dto : CreatePostDto ) {
-        const newPost = {
-            id: Date.now(),
-            ...dto,
-        };
-        this.posts.push(newPost);
-        return newPost;
-    }
-        update(id: number, dto: UpdatePostDto) {
-            const post = this.findOne(id);
-            Object.assign(post, dto);
-            return post;
-}
-    remove(id: number) {
-        const post = this.findOne(id);
-        this.posts = this.posts.filter(p => p.id !== id);
-        return post;
+  async delete(id: string, userId: string) {
+    const post = await this.findOne(id, userId);
+    if(post.author.toString() !== userId) {
+      throw new ForbiddenException('You are not allowed to delete this post');
     }
 
-
+    await post.deleteOne();
+    return { message: 'Post deleted successfully' };
+  }
 }
