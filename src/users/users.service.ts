@@ -19,7 +19,8 @@ export class UsersService {
     private jwt: JwtService,
   ) {}
 
-  async register(dto: CreateUserDto) {
+  async register(dto: CreateUserDto) 
+  {
     const existing = await this.userModel.findOne({ email: dto.email });
     if (existing) throw new BadRequestException('Email already exists');
 
@@ -32,7 +33,8 @@ export class UsersService {
     return { id: user._id, email: user.email };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto) 
+  {
     const user = await this.userModel.findOne({ email: dto.email });
     if (!user) throw new NotFoundException('User not found');
 
@@ -48,23 +50,27 @@ export class UsersService {
     return { token, user: { id: user._id, email: user.email, role: user.role } };
   }
 
-  async findAll() {
+  async findAll() 
+  {
     return this.userModel.find().select('-password');
   }
 
-  async findOne(id: string) {
+  async findOne(id: string) 
+  {
     const user = await this.userModel.findById(id).select('-password');
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto) 
+  {
     const user = await this.userModel.findByIdAndUpdate(id, dto, { new: true });
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
-  async delete(id: string) {
+  async delete(id: string) 
+  {
     const user = await this.userModel.findByIdAndDelete(id);
     if (!user) throw new NotFoundException('User not found');
     return { message: 'Deleted successfully' };

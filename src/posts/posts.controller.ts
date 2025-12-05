@@ -11,30 +11,35 @@ export class PostsController {
 
 
   @HttpPost()
-  create(@Req() req, @Body() dto: CreatePostDto) {
+  create(@Req() req, @Body() dto: CreatePostDto) 
+  {
     return this.postsService.create(dto, req.user.userId);
   }
 
   @Get()
-  findAll(@Req() req) {
+  findAll(@Req() req) 
+  {
     return this.postsService.findAll(req.user.userId);
   }
 
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req) {
+  findOne(@Param('id') id: string, @Req() req) 
+  {
     return this.postsService.findOne(id, req.user.userId);
   }
 
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePostDto, @Req() req) {
+  update(@Param('id') id: string, @Body() dto: UpdatePostDto, @Req() req) 
+  {
     return this.postsService.update(id, dto, req.user.userId);
   }
 
-  
+
   @Delete(':id')
-  delete(@Param('id') id: string, @Req() req) {
+  delete(@Param('id') id: string, @Req() req) 
+  {
     return this.postsService.delete(id, req.user.userId);
   }
 }

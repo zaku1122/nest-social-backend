@@ -12,7 +12,8 @@ export class PostsService {
   ) {}
 
 
-  async create(dto: CreatePostDto, userId: string) {
+  async create(dto: CreatePostDto, userId: string) 
+  {
     return this.postModel.create({
       ...dto,
       author: userId,
@@ -20,12 +21,14 @@ export class PostsService {
   }
 
 
-  async findAll(userId: string) {
+  async findAll(userId: string) 
+  {
     return this.postModel.find({ author: userId });
   }
 
 
-  async findOne(id: string, userId: string) {
+  async findOne(id: string, userId: string) 
+  {
     const post = await this.postModel.findById(id);
     if (!post)
     {   
@@ -36,10 +39,12 @@ export class PostsService {
   }
 
 
-  async update(id: string, dto: UpdatePostDto, userId: string) {
+  async update(id: string, dto: UpdatePostDto, userId: string) 
+  {
     const post = await this.findOne(id, userId);
 
-    if(post.author.toString() !== userId) {
+    if(post.author.toString() !== userId) 
+    {
       throw new ForbiddenException('You are not allowed to update this post');
     }
 
